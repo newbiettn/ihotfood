@@ -1,23 +1,176 @@
+
 <script>
 	function NGOCTRAN() {
 		var SELF = this,
 			$progressbar = $( "#progressbar" );
 		SELF.uuid = '<?php echo $this->session->userdata('uuid'); ?>';
-		SELF.pusher = new Pusher('54120ecb88a7a7dc598b');
-		
-		SELF.channel = SELF.pusher.subscribe(SELF.uuid);
-		
+		SELF.user_id = '<?php echo $this->session->userdata('id'); ?>';
+		SELF.pusher_connection_socket_id = null;
+		SELF.pusher = null;
+		SELF.notification_count = 0;
+		SELF.invokeNotificationPanel = function(message) {
+			notification_panel = new NotificationFx({
+				wrapper : document.body,
+				message : message,
+				layout : 'growl',
+				effect : 'genie',
+				type : 'notice', // notice, warning or error
+				onClose : function() {
+				}
+			});
+			notification_panel.show();
+		}
+		//channel initalize
+	<?php if ($this->session->userdata('id')) { ?>
+		SELF.pusher = new Pusher('54120ecb88a7a7dc598b', { authEndpoint: '<?php echo base_url("/index.php/user/login/pusher_authentication"); ?>' });
+		SELF.pusher.connection.bind('connected', function() {
+			SELF.pusher_connection_socket_id = SELF.pusher.connection.socket_id;
+		});
+		SELF.channel_ids = [];
+		 
+		<?php if ($this->session->userdata('channels')) { 
+			foreach ($this->session->userdata('channels') as $c) {
+				echo('SELF.channel_ids.push("' . $c['channel_id'] . '");');
+			}
+		?>
+
+	<?php foreach ($this->session->userdata('channels') as $c) {
+			echo('var channel_name_' . $c["channel_id"] .' = "' . NEW_REVIEW_NOTIFCATION_CHANNEL . $c["channel_id"]. '";');
+			echo('var channel_'. $c["channel_id"] . '= SELF.pusher.subscribe(channel_name_' . $c["channel_id"] . ');');
+			echo('var event_name = "' . NEW_REVIEW_NOTIFCATION_EVENT . '";');
+			echo('channel_'. $c["channel_id"] . '.bind(event_name, function(data) {
+					SELF.invokeNotificationPanel(data.message_panel);
+					SELF.refreshComments(data.dest);
+					console.log(data.message_top);
+					SELF.addNewNotificationTop(jQuery.parseJSON(data.message_top));
+				});');
+	} ?>
+	
+	<?php 	} ?>
+	<?php } ?>
+	
 		SELF.setupProgressingBar = function(){
 			$progressbar.progressbar();
 			$progressbar.css('display', 'none');
 		},
+		SELF.setupNotificationAtStart = function () {
+			$.post('<?php echo base_url("/index.php/user/notify/retrieve_all"); ?>', {user_id : SELF.user_id}, function(data){
+				if (data.length>0) {
+					dataJson = jQuery.parseJSON(data);
+					console.log(dataJson['results'][0]);
+					
+					SELF.notification_count = dataJson['unseen_notification'];
+					$('.js-count').attr('data-count', SELF.notification_count).html(SELF.notification_count);
+
+					var d = dataJson['results'];
+					$(d).each(function(index){
+						if (d[index]['status'] == 'seen') {
+							status = 'expired'
+						} else {
+							status = '';
+						}
+						itemStr = 	'<li class="item js-item '+ status + '" data-id="'+ d[index]['id'] +'">' +
+									'<a href="' + d[index]["url"] + '">' +
+			            			'<div class="details">' +
+			            				'<span class="title">' + d[index]['title'] + '</span>' +
+			            				'<span class="date">' + d[index]['created_date'] +'</span>' +
+			          				'</div>' +
+			          				'<button type="button" class="button-default button-dismiss js-dismiss">×</button>' +
+			          				'</a>' +
+			        				'</li>';
+						$('.notifications-list').prepend(itemStr);
+					});
+					
+				}
+			});
+		},
+		SELF.handleNotificationTopAction = function(){
+			var cssTransitionEnd = getTransitionEnd();
+			var container = $('body');
+			$('.js-show-notifications').click(function(){
+				$('.js-notifications').toggleClass('notifications-active');
+				$('.js-dismiss').click(function(event){
+					var item = $(event.currentTarget).parents('.js-item');
+					console.log( item[0]);
+					var removeItem = function() {
+						item[0].removeEventListener(cssTransitionEnd, removeItem, false);
+						item.remove();
+				        
+				        /* update notifications' counter */
+				        var countElement = container.find('.js-count');
+				        var prevCount = +countElement.attr('data-count');
+				        var newCount = prevCount - 1;
+				        countElement
+				          .attr('data-count', newCount)
+				          .html(newCount);
+				        
+				        if(newCount === 0) {
+				          countElement.remove();
+				          container.find('.js-notifications').addClass('empty');
+				        }
+				      };
+				      
+				      item[0].addEventListener(cssTransitionEnd, removeItem, false);
+				      item.addClass('dismissed');
+				      return true;
+				});
+			});
+			
+			function getTransitionEnd() {
+				var supportedStyles = window.document.createElement('fake').style;
+				var properties = {
+						'webkitTransition': { 'end': 'webkitTransitionEnd' },
+						'oTransition': { 'end': 'oTransitionEnd' },
+						'msTransition': { 'end': 'msTransitionEnd' },
+						'transition': { 'end': 'transitionend' }
+				};
+				var match = null;
+				Object.getOwnPropertyNames(properties).forEach(function(name) {
+					if (!match && name in supportedStyles) {
+						match = name;
+						return;
+					}
+				});
+				return (properties[match] || {}).end;
+			}
+		},
+		SELF.addNewNotificationTop = function(item) {
+			itemStr = '<li class="item js-item {{#isExpired}}expired{{/isExpired}}" data-id="{{id}}">' +
+            			'<div class="details">' +
+            				'<span class="title">' + item.title + '</span>' +
+            				'<span class="date">' + item.created_date +'</span>' +
+          				'</div>' +
+          				'<button type="button" class="button-default button-dismiss js-dismiss">×</button>' +
+        			'</li>';
+			$('.notifications-list').prepend(itemStr);
+			//update count
+			SELF.notification_count += 1;
+			$('.js-count').attr('data-count', SELF.notification_count).html(SELF.notification_count);
+		},
+		SELF.refreshComments = function(dest) {
+			$('.comment-container').slideUp(1500);
+			jQuery.get(dest, function(html){
+				jQuery(".comment-container").slideDown(1500);
+				new_html = $(html).find(".comments").html();
+				jQuery("#comments-listing").html(new_html);
+				jQuery("#comments-listing .star").rating(); 
+				SELF.reviewSubmit();
+				/******** BEGIN Duc **********/
+				SELF.reviewDelete();
+				/******** END Duc ***********/
+			});
+		}
 		SELF.setupRating = function(){
 			$('#review_score .star').rating();
 		},
+		<?php if($this->router->fetch_class() == 'restaurant') {?>
 		SELF.reviewSubmit = function() {
 			$('form[name="review_form"]').submit(function(event){
 				var postData = $(this).serializeArray();
+				var socketObj = {name: 'socket_id', value: SELF.pusher_connection_socket_id};
+				postData.push(socketObj);
 				var formUrl = $(this).attr("action");
+				$('.comment-container').slideUp(1000);
 				$.ajax({
 					type: 'POST',
 					url: formUrl,
@@ -30,20 +183,79 @@
 								$('#review_'+index)
 									.append('<small class="error">'+data['error'][index]+'</small>');
 							});
+							$('.comment-container').slideDown(1000);
 						} else {
-							$.get('<?php echo base_url("/index.php/restaurant/show_restaurant/308"); ?>', function(html){
-									new_html = $(html).find('.comments').html();
-									//$('.comments').html('');
-									$('#comments-listing').html(new_html);
-									$('#comments-listing .star').rating(); 
-									ngoctran.reviewSubmit();
+							/**************** BEGIN Duc ******************/
+							// start upload photos
+							$("form#review-photo-upload input[name=review-id]").val(data['new-review-id']);
+							var addReviewPhotoUploader = Dropzone.instances[0];
+							if(addReviewPhotoUploader.files.length > 0 ) {
+								addReviewPhotoUploader.processQueue();	
+							}
+							/**************** END Duc ******************/
+							$.get('<?php echo base_url("/index.php/restaurant/show_restaurant/" . $restaurant->id); ?>', function(html){
+								$('.comment-container').slideDown(1500);
+								new_html = $(html).find('.comments').html();
+								$('#comments-listing').html(new_html);
+								$('#comments-listing .star').rating(); 
+								SELF.reviewSubmit();
+								var channel_name = "channel_name_" + "<?php echo $restaurant->id?>";
+								var event_name = "<?php echo NEW_REVIEW_NOTIFCATION_EVENT ?>";
+								var channel = SELF.pusher.subscribe(channel_name);
+								channel.bind(event_name, function(data){
+									SELF.refreshComments(data.dest);
+								});
+								/******** BEGIN Duc **********/
+								SELF.reviewDelete();
+								Dropzone.instances.pop();
+								Dropzone.discover();
+								/******** END Duc ******/
 							});
-						}
+						}						
 					}
 				});
 				return false; //disable refresh
 			});
 		}
+		/********** BEGIN Duc ***********/
+		SELF.reviewDelete = function() {
+			$('a.delete-review-link').on("click", function() {
+				var confirmed = confirm("Delete this review?");
+				if(confirmed) {
+					var temp = this.id.split("-");
+					var id = temp[temp.length-1];
+					$.ajax({
+						type: 'POST',
+						url: "<?php echo base_url()?>index.php/restaurant/user_delete_review/",
+						dataType: 'json',
+		  				data: "review_id=" + id,
+						success: function( data, xhr ) {
+							if( data['status'] != 'true') {
+								alert('cannot delete review');
+							}
+							else {
+							$('.comment-container').slideUp(1500);
+								var dest = '<?php echo base_url("/index.php/restaurant/show_restaurant/" . $restaurant->id); ?>';
+								jQuery.get(dest, function(html){
+									jQuery(".comment-container").slideDown(1500);
+									new_html = $(html).find(".comments").html();
+									jQuery("#comments-listing").html(new_html);
+									jQuery("#comments-listing .star").rating(); 
+									SELF.reviewSubmit();
+									SELF.reviewDelete();
+									// reinitialize dropzone photo uploader
+									Dropzone.instances.pop();
+									Dropzone.discover();
+								});
+							}
+						}
+					});
+				}
+				return false;
+			});
+		}
+		/********** END Duc ************/
+		<?php };?>
 		SELF.indicateProgressing = function(percentComplete) {
 			console.log(percentComplete);
 			if (percentComplete > 0 && percentComplete < 100) {
@@ -131,6 +343,14 @@
 		        }
 		    }
 		},
+		SELF.enrichRestaurant = function(restaurant_id, place_id) {
+			var url = '<?php base_url()?>index.php/user/search/enrich_detail_res/restaurantid/' + restaurant_id + '/placeid/'+  place_id;
+			$.ajax({
+				url: url,
+				type: "POST",
+				async: false
+			});
+		},
 		SELF.doAjaxSearch = function(){
 			$.ajax({
 				type: 'POST',
@@ -146,30 +366,36 @@
 					if (data !== null && data !== undefined) {
 						var jsonArr = [];
 						var mapCenterData = new SELF.mapCenter();
-						//console.log(mapCenterData.adjustCenterCoords(1,2));
 						for(i = 0; i < data.length; i++) {
 							//find center of markers
-							mapCenterData.adjustCenterCoords(data[i]['latlong']);
+							var latLngStr = data[i]['latlong'];
+							var latLng = latLngStr.split(",");
+							mapCenterData.adjustCenterCoords(latLng[0], latLng[1]);
+
 							if (typeof(data[i]['photoRef']) !== 'undefined') {
 								photo_ref = 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&key=AIzaSyDnFgyjhnO9aeD29mvPtgL8tGnt5z90SZA&photoreference='+data[i]['photoRef'];	
 							} else {
 								photo_ref = '<?php base_url()?>index.php/static/frontend/img/WB07T46L6.png';
 							}
+							if (typeof data[i]['rating'] == 'undefined') {
+								data[i]['rating'] = 'No rating available';
+							}
+							var url = '<?php base_url()?>index.php/restaurant/show_restaurant/' + data[i]['restaurant_id'];
 							//construct info
 							var str = '<div class="infobox-wrapper">'
 									+ '<div>'
 									+ '<div class="infobox-inner">'
-									+ '<a href="<?php base_url()?>index.php/restaurant/display">'
+									+ '<a class="restaurant_enrich" target="_blank" href="' + url + '">'
 									+ '<div class="infobox-image">'
 									+ '<img src="'+photo_ref+'">'
 									+ '<div>'
-									+ '<span class="infobox-price">' + data[i]['tel'] + '</span>'
+									+ '<span class="infobox-price">' + data[i]['rating'] + '</span>'
 									+ '</div>'
 									+ '</div>'
 									+ '</a>'
 									+ '<div class="infobox-description">'
 									+ '<div class="infobox-title">'
-									+ '<a href="<?php base_url()?>index.php/restaurant/display">' + data[i]['name'] +'</a>'
+									+ '<a target="_blank" href="'+url +'">' + data[i]['name'] +'</a>'
 									+ '</div>'
 									+ '<div class="infobox-location">' + data[i]['address'] + '</div>'
 									+ '</div>'
@@ -182,30 +408,39 @@
 								latLng: data[i]['latlong'],
 								data:  str
 							});
+							SELF.enrichRestaurant(data[i]['restaurant_id'], data[i]['place_id']);
 						}
-
-						$('#map_canvas').gmap3({
+						//enrich
+						
+						
+						$("#map_canvas").gmap3({
+							clear: {
+							      name:["marker"]
+							}
+						});
+						$('#map_canvas').gmap3({	
 							map:{
 								options:{
 					              center:[mapCenterData.center_lat, mapCenterData.center_lng],
-					              //zoom: 12,
+					              zoom: 12,
 					              scrollwheel: false
 					            }
 					        }
 				        });
+				        
 						$.each(jsonArr, function(key, val) {
-							//console.log(val);
+							var latLng = val.latLng
 							$('#map_canvas').gmap3({
 								marker: {
 									options: {
 										icon: '<?php base_url()?>static/frontend/img/restaurant.png',
 									},
-									latLng: val.latLng,
+									latLng: latLng.split(","),
 									events: {
 										click: function(marker, event, context){
 											$(this).gmap3({
 												overlay: {
-													latLng: val.latLng,
+													latLng: latLng.split(","),
 													options:{
 														content: val.data,
 														offset:{
@@ -233,7 +468,7 @@
 				}
 			});
 		},
-		SELF.setupNotification = function() {
+		SELF.makeNotificationTop = function() {
 			var today = new Date();
 			var items = generateItems(today);
 			refreshNotifications(items, today);
@@ -494,7 +729,8 @@
 	}
 	var ngoctran = new NGOCTRAN();
 	$(function () {
-		ngoctran.setupNotification();
+		ngoctran.handleNotificationTopAction();
+		ngoctran.setupNotificationAtStart();
 	});
 	$(document).ready(function(){
 		//var ngoctran = new NGOCTRAN();
@@ -507,12 +743,14 @@
 		ngoctran.setupMap();
 		ngoctran.setupSearch();
 		ngoctran.setupProgressingBar();
-
 		//dynamically load js for restaurant pages
 		<?php 
 			if($this->router->fetch_class() == 'restaurant') {
 				echo('ngoctran.reviewSubmit();');
 				echo('ngoctran.setupRating();');
+				/******** BEGIN Duc ************/
+				echo('ngoctran.reviewDelete();');
+				/******** END Duc ************/
 			}
 		?>
 	});
