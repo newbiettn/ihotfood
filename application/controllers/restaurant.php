@@ -6,6 +6,8 @@ class Restaurant extends CI_Controller {
 	public function show_restaurant($id) {
 		$this->load->model( 'restaurant/restaurant_model' );
 		$this->load->model( 'restaurant/review_model' );
+		$this->load->model( 'restaurant/tag_restaurant_model' );
+
 		$restaurant = $this->restaurant_model->get_restaurant_by_id($id);
 		if(! $restaurant ) {
 			$data = array (
@@ -17,14 +19,37 @@ class Restaurant extends CI_Controller {
 		else {
 			$review_list = $this->review_model->get_restaurant_reviews($id);
 			$this->load->model("user/basic_user_model");
+			$this->load->model("restaurant/media_model");
+
 			$reviews = array();
 			foreach ($review_list as $review) {
 				$review->user_info = $this->basic_user_model->get_user_info_by_id($review->user_id);
+				$review->photos = $this->media_model->get_all_album_medias($review->album_id);
+				foreach($review->photos as $photo) {
+					$temp = explode('.',$photo->filename);
+					$photo->thumbnailFilename = $temp[0] . '_thumb.' . $temp[1];
+				}
 				array_push($reviews, $review);
 			}
+
+			// get sample photos 
+			$this->load->model( 'restaurant/media_model' );
+			$photos = $this->media_model->get_sample_album_medias($restaurant->album_id, 3);
+			$samplePhotos = array();
+			foreach ($photos as $photo) {
+				$temp = explode('.',$photo->filename);
+				$photo->thumbnailFilename = $temp[0] . '_thumb.' . $temp[1];
+				array_push($samplePhotos, $photo);
+			}
+
+			$this->load->library("../controllers/user/facebook_login");
+			$facebookLoginURL = $this->facebook_login->get_facebook_login_url();
 			$data = array (
 				'restaurant' => $restaurant,
 				'reviews' => $reviews,
+				'samplePhotos' => $samplePhotos,
+				'facebookLoginURL' => $facebookLoginURL,
+				'restaurantTags' => $this->tag_restaurant_model->get_restaurant_tag_list($id),
 			);
 			
 			$this->load->view ( 'frontend/view_restaurant', $data );
@@ -78,6 +103,7 @@ class Restaurant extends CI_Controller {
 			
 			if(! $this->input->post('review-id')) {
 				$new_review_id = $this->review_model->create_review($resId);
+				$this->restaurant_model->update_average_rating($resId);
 				if(! $new_review_id ) {
 					$data = array(
 						"heading" => "Unexpected error",
@@ -106,6 +132,7 @@ class Restaurant extends CI_Controller {
 			}
 			else {
 				$this->review_model->update_review($this->input->post('review-id'));
+				$this->restaurant_model->update_average_rating($resId);
 				$jsonArr['status'] = 'true';
 				$jsonArr['new-review-id'] = $this->input->post('review-id');
 			}
@@ -141,6 +168,11 @@ class Restaurant extends CI_Controller {
 				$this->album_model->delete_album($albumId);
 
 				$this->review_model->delete_review($reviewId);
+
+				// update restaurant average score
+				$this->load->model( 'restaurant/restaurant_model' );
+				$this->restaurant_model->update_average_rating($review->restaurant_id);
+
 				$jsonArr['status'] = 'true';
 			}
 		}
@@ -165,9 +197,12 @@ class Restaurant extends CI_Controller {
 			array_push($photos, $photo);
 		}
 
+		$this->load->library("../controllers/user/facebook_login");
+		$facebookLoginURL = $this->facebook_login->get_facebook_login_url();
 		$data = array(
 			'restaurant' => $restaurant,
 			'photos' => $photos,
+			'facebookLoginURL' => $facebookLoginURL,
 		);
 		$this->load->view ( 'frontend/restaurant_photo_gallery', $data);
 	}

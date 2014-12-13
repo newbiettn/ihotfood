@@ -11,23 +11,24 @@
 				</div>
 			</a>
 			<a href=""><div class="large-2 columns">  <font color="white">Photos</font> </div></a>
-			<a href=""><div class="large-2 columns">  <font color="white">Articles</font> </div></a>
-			<a href="#map"><div class="large-2 columns">  <font color="white">Map</font> </div></a>
 			<div class="large-4 columns"></div>
 		</div>
 	</div>
 
+	<a name="gallery"> </a>
 	<div class="row restaurant">
 		<div class="large-12 large-centered">
-			<ul class="clearing-thumbs" data-clearing>
+			<ul class="clearing-thumbs" data-clearing data-options={open_selectors:'.clearing-img'}>
 				<?php foreach($photos as $photo) { ?>
 					<li>
-						<a href="<?php echo base_url() . 'static/user_upload/' . $photo->filename; ?>">
-							<img src="<?php echo base_url() . 'static/user_upload/' . $photo->thumbnailFilename; ?>">
-						</a>
-						<!-- <a href="">
-						<img class="delete-photo-button" src="<?php echo base_url() . 'static/frontend/img/close.png' ?>" style="width:15px;height:15px">
-					</a> -->
+						<div class="gallery-thumbnails"> 
+							<a class="clearing-img" href="<?php echo base_url() . 'static/user_upload/' . $photo->filename; ?>">
+								<img src="<?php echo base_url() . 'static/user_upload/' . $photo->thumbnailFilename; ?>">
+							</a>
+							<?php if($this->session->userdata('id') && $this->session->userdata('id') == $restaurant->owner_id ) { ?>
+								<input class="delete-photo-button" type="button" value="Delete" onclick="deletePhoto('<?php echo $photo->filename; ?>')" />
+							<?php } ?>
+						</div>
 					</li>
 				<?php } ?>
 			</ul>
@@ -40,44 +41,28 @@
 				<form action="<?php echo site_url('/photo/upload_restaurant_photo'); ?>" class="dropzone" id="dropzone-photo-upload"> 
 					<input type="hidden" name="restaurant-id" value="<?php echo $restaurant->id ?>" />
 				</form>
+				<a href="#gallery"> <input type="submit" value="Upload photos" onclick="uploadPhotos()" /> </a>
 			</div>
 		</div>
 	<?php } ?>
 
-	<?php require 'scripts.php'?>
-	<?php require 'footer.php'?>
-
 	<script type="text/javascript">
-		var uploadedFiles = [];
 		$( document ).ready( function() {
 			Dropzone.options.dropzonePhotoUpload = {
 				paramName: "file", // The name that will be used to transfer the file
 				maxFilesize: 2, // MB
 				uploadMultiple: true,
-				createImageThumbnails: true,
 				acceptedFiles: 'image/*',
 				addRemoveLinks: true,
 				createImageThumbnails: true,
 				parallelUploads: 100,
-
-				//autoProcessQueue: false,	// not uploading each time file added
-				// maxFiles: 50,
+				autoProcessQueue: false,
 
 				init:function() {
-					this.on("removedfile", function(file) {
-						$.ajax({
-				  			type : "POST",
-				  			url : "<?php echo site_url('/photo/remove_uploaded_restaurant_photo') ?>",
-				  			data: "filename=" + file.serverFileName + "&restaurant-id=" + <?php echo $restaurant->id ?>,
-				  			success: function(result) {
-				  			}
-				  		});
+    				this.on("successmultiple", function(file, response) {
+    					refreshGallery();
     				});
-    				this.on("success", function(file, response) {
-    					var nameOnServer = response;
-    					file.serverFileName = nameOnServer;
-    				});
-				}
+				},
 			};
 		});
 		
@@ -89,12 +74,49 @@
 		  	$("#photo-upload").show();
 		});
 
-		$(".delete-photo-button").on("click", function() {
-			alert("shit");
+		function uploadPhotos() {
+			var photoUploader = Dropzone.instances[0];
+			if(photoUploader.files.length > 0 ) {
+				photoUploader.processQueue();	
+			}
+			else {
+				alert("Sorry ! You have to choose photo to upload");
+			}
+		}
 
-		});
+		function deletePhoto(filename) {
+			var confirmed = confirm("Delete this photo?");
+			if(! confirmed) return;
+			$.ajax({
+				type : 'POST',
+				url : "<?php echo site_url('photo/remove_photo/'); ?>",
+				data : 'filename=' + filename,
+				success : function(response) {
+					if (response['status'] != 'trt ue') {
+						refreshGallery();
+					}
+					else {
+						alert("Something went wrong. Please try again later")
+					}
+				},
+			});
+		}		
 		
+		// user ajax to reload gallery
+		function refreshGallery() {
+			$('.clearing-thumbs').slideUp(500);
+			$.get('<?php echo site_url("/restaurant/photo_gallery/" . $restaurant->id); ?>', function(html){
+				new_html = $(html).find('.clearing-thumbs').html();
+				$('.clearing-thumbs').html(new_html);
+				$('.clearing-thumbs').slideDown(500);
+			});
+			// clear file from uploader
+			Dropzone.instances[0].removeAllFiles();
+		}
+
 	</script>
 
+	<?php require 'scripts.php'?> 
+	<?php require 'footer.php'?>
 </body>	
 </html>

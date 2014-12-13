@@ -19,33 +19,35 @@ class Photo extends CI_Controller {
 		else {
 			if (!empty($_FILES)) {
 				$album_id = $restaurant->album_id;
+				$len = count($_FILES['file']['tmp_name']);
+				for($i=0; $i < $len; $i ++) {
+					$tempFile = $_FILES['file']['tmp_name'][$i];
+					$fileName = $_FILES['file']['name'][$i];
+					$targetPath = 'static/user_upload/';
+					$serverFileName = $this->generate_unique_file_name($album_id, $fileName);
+					$targetFile = $targetPath . $serverFileName;
 
-				$tempFile = $_FILES['file']['tmp_name'];
-				$fileName = $_FILES['file']['name'];
-				$targetPath = 'static/user_upload/';
-				$serverFileName = $this->generate_unique_file_name($album_id, $fileName);
-				$targetFile = $targetPath . $serverFileName;
+					// save file to server
+					move_uploaded_file($tempFile, $targetFile);
+					
+					// save to database
+					$this->load->model("restaurant/media_model");
+					$this->media_model->create_media($album_id, $serverFileName);
 
-				// save file to server
-				move_uploaded_file($tempFile, $targetFile);
-				
-				// save to database
-				$this->load->model("restaurant/media_model");
-				$this->media_model->create_media($album_id, $serverFileName);
+					// create and save image thumbnail
+					// configs for image library to create thumbnails
+					$config['image_library'] = 'gd2';
+					$config['create_thumb'] = TRUE;
+					$config['maintain_ratio'] = TRUE;
+					$config['width']	= 100;
+					$config['height']	= 100;
+					$config['source_image']	= $targetFile;
+					$this->image_lib->initialize($config);
+					$thumbnail = $this->image_lib->resize();
 
-				// create and save image thumbnail
-				// configs for image library to create thumbnails
-				$config['image_library'] = 'gd2';
-				$config['create_thumb'] = TRUE;
-				$config['maintain_ratio'] = TRUE;
-				$config['width']	= 100;
-				$config['height']	= 100;
-				$config['source_image']	= $targetFile;
-				$this->image_lib->initialize($config);
-				$thumbnail = $this->image_lib->resize();
-
-				// return the name as which the file is store in server (for removing if necessary)
-				echo($serverFileName);
+					// return the name as which the file is store in server (for removing if necessary)
+					echo($serverFileName);
+				}
 			}
 		}
     }
@@ -111,12 +113,44 @@ class Photo extends CI_Controller {
 		}
     }
 
+    public function remove_photo() {
+		$this->load->model("restaurant/media_model");
+		$filename = $this->input->post('filename');
+		if( ! $this->session->userdata('id') || 
+			$this->session->userdata('id') != $this->media_model->get_media($filename)->user_id ) {
+	 		$jsonArr['status'] = 'false';	
+		}
+		else {
+			$this->media_model->delete_media($filename);
+	 		$jsonArr['status'] = 'true';	
+		}
+	 	echo(json_encode($jsonArr));
+    }
+
+    public function remove_review_photo() {
+    	$filenames = json_decode($this->input->post('filenames'));
+		$this->load->model("restaurant/media_model");
+	 	$jsonArr['status'] = 'true';
+    	foreach($filenames as $filename) {
+    		if( ! $this->session->userdata('id') || 
+				$this->session->userdata('id') != $this->media_model->get_media($filename)->user_id ) {
+		 		$jsonArr['status'] = 'false';
+		 		break;	
+			}
+			else {
+    			$this->media_model->delete_media($filename);
+    		}
+    	}
+	 	echo(json_encode($jsonArr));
+    }
 
     public function generate_unique_file_name($album_id, $fileName) {
-    	$filename = tempnam('static/user_upload/', '');
-    	unlink($filename);
-    	// filename = "directory/<unique>.tmp"
-    	$temp = explode('\\', $filename);
-    	return explode('.', $temp[count($temp)-1])[0] . $_SERVER['REQUEST_TIME'] . $fileName;
+    	$tempFilename = tempnam('static/user_upload/', '');
+    	unlink($tempFilename);
+    	// tempFilename = "directory/<unique>.tmp"
+    	$temp = explode('\\', $tempFilename);
+    	// get file extension
+    	$temp2 = explode('.', $fileName);
+    	return explode('.', $temp[count($temp)-1])[0] . $_SERVER['REQUEST_TIME'] . '.' . $temp2[count($temp2) -1 ];
     }
 }
