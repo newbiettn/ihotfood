@@ -17,6 +17,8 @@ class Login_Model extends CI_Model{
 		}
 	}
 	
+
+
 	function create_member(){
 		$data=array(
 			'username' => $this->input->post('username'),

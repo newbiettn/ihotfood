@@ -26,6 +26,31 @@ time, mark, audio, video {
 	vertical-align: baseline;
 }
 
+/*h2 {
+	width: 40%;
+	text-align: center;
+	margin-bottom: 20px;
+}*/
+
+div.content {
+	margin-left: auto; 
+	margin-right: auto;
+	align: left;
+}
+
+label {
+	margin-top: 5px;
+	margin-bottom: 5px;
+	display: inline-block;
+	width: 10%;
+
+}
+
+label.address{
+	width: 15%;
+	display: inline-block;
+}
+
 /* HTML5 display-role reset for older browsers */
 article, aside, details, figcaption, figure, 
 footer, header, hgroup, menu, nav, section {
@@ -53,6 +78,10 @@ table {
 	border-collapse: collapse;
 	border-spacing: 0;
 } 
+
+#user_form tr td{
+	width: 80px;
+}
 
 /**  MAIN STYLES  **/
 
@@ -85,7 +114,8 @@ body {
 
 p {
 	margin: 0 0 10px 0;
-	line-height: 15px;
+	line-height: 10px;
+	width: 40%;
 }
 
 a:link, a:active, a:visited {
@@ -103,6 +133,13 @@ input[type="text"], input[type="email"], input[type="search"], input[type="passw
 	background: #fff;
 }
 
+input[type="radio"]{
+	width: 10%;
+}
+
+input.address{
+	width: 15%;
+}
 input, textarea {
 	padding:10px;
 	font-size: 12px;
@@ -110,8 +147,9 @@ input, textarea {
 	color:#606060;
 	border:1px solid #e3e3e3;
 	background: #fff;
-	width: 100%;
+	width: 30%;
 	margin: 0 0 15px 0;
+
 	
 	border-radius:3px;
 	-webkit-border-radius:3px;
@@ -237,7 +275,7 @@ section.alert div, div.green {
 div.green, div.orange, div.red {
 	padding: 10px;
 	position: relative;
-	margin: 15px 0;
+	margin: 15px 0;	
 	
 	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
 	-webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3);
@@ -492,6 +530,7 @@ section.widget {
 	-moz-box-sizing: border-box;    /* Firefox, other Gecko */
 	box-sizing: border-box;         /* Opera/IE 8+ */
 	min-height: 400px;
+	overflow-x:scroll;
 	
 	border-radius: 5px;
 	-webkit-border-radius: 5px;
@@ -510,10 +549,12 @@ section.widget header {
 	height: 35px;
 	border-bottom: none;
 	overflow: visible;
+
 	
 	border-radius: 5px 5px 0 0;
 	-webkit-border-radius: 5px 5px 0 0;
 	-moz-border-radius: 5px 5px 0 0;
+
 }
 
 section.widget header span.icon {
@@ -1197,7 +1238,8 @@ table#myTable input[type="checkbox"]{
 }
 
 table#myTable th:first-child {
-	padding-left:50px;
+	/*padding-left:50px; */
+	width: 10px;
 }
 
 table#myTable tr:nth-child(odd) {
@@ -1250,13 +1292,14 @@ table#myTable tr:hover {
 table#myTable th {
 	font-weight:bold;
 	min-width:100px;
-	padding: 15px 15px 0 15px;
-	text-align: left;
+	padding: 15px 15px 15pxfield-wrap 15px;
+	text-align: center;
 }
 
 table#myTable td {
 	vertical-align: middle;
-	padding: 15px;
+	padding: 5px 5px 5px 5px;
+	text-align: center;
 }
 
 table#myTable thead tr .header {
@@ -1265,6 +1308,7 @@ table#myTable thead tr .header {
 	background-position: center right;
 	cursor: pointer;
 	height: 2em;
+	text-align: center;
 }
 
 table#myTable thead tr .headerSortUp {
