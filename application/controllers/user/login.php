@@ -27,6 +27,10 @@ class Login extends CI_Controller {
 	// --------------------------------------------------------------------
 	public function show_login() {
 		if (! $this->session->userdata ( 'username' )) {
+			$this->load->library("../controllers/user/facebook_login");
+			$facebookLoginURL = $this->facebook_login->get_facebook_login_url();
+
+			$data['facebookLoginURL'] = $facebookLoginURL;
 			$data ['username_cookie'] = $this->input->cookie ( 'ihf_usr_ck' );
 			$this->load->view ( 'frontend/login', $data );
 		} else {
@@ -36,7 +40,12 @@ class Login extends CI_Controller {
 	// --------------------------------------------------------------------
 	public function show_register() {
 		if (! $this->session->userdata ( 'username' )) {
-			$this->load->view ( 'frontend/register' );
+			$this->load->library("../controllers/user/facebook_login");
+			$facebookLoginURL = $this->facebook_login->get_facebook_login_url();
+
+			$data['facebookLoginURL'] = $facebookLoginURL;
+
+			$this->load->view ( 'frontend/register', $data );
 		} else {
 			redirect ( 'welcome' );
 		}
