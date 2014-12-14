@@ -1,19 +1,30 @@
-<?php include 'metadata.php'?>
-<script src="<?php echo base_url(); ?>static/frontend/js/rating/jquery.rating.js"></script>
+<?php include 'metadata.php' ?>
+<script type="text/javascript" src="<?php echo base_url(); ?>static/frontend/js/rating/jquery.rating.js"></script>
 <link rel="stylesheet" href="<?php echo base_url(); ?>static/frontend/js/rating/jquery.rating.css" />
+<script src="<?php echo base_url(); ?>static/frontend/js/tagging/tag-it.js" type="text/javascript" charset="utf-8"></script>
+<link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>static/frontend/css/jquery.tagit.css">
+
 <body>
-	<?php require 'nav.php'?>
+	<div id="fb-root"></div>
+	<script>(function(d, s, id) {
+		var js, fjs = d.getElementsByTagName(s)[0];
+		if (d.getElementById(id)) return;
+		js = d.createElement(s); js.id = id;
+		js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&appId=590280537744516&version=v2.0";
+		fjs.parentNode.insertBefore(js, fjs);
+	}(document, 'script', 'facebook-jssdk'));</script>
+
+	<?php require 'nav.php' ?>
 	<!-- Begin Restaurant Navigation bar -->
 	<div class="row navigation" style="position: relative; top:20px; background: #565a5c; "> 
  		<div class="large-12 large-centered" > 
  			<a href=""><div class="large-2 columns">  <font color="white">Overview</font> </div></a> 
  			<a href="<?php echo site_url('restaurant/photo_gallery')?>/<?php echo $restaurant->id ?>"><div class="large-2 columns">  <font color="white">Photos</font> </div></a> 
- 			<a href=""><div class="large-2 columns">  <font color="white">Articles</font> </div></a> 
  			<a href="#map"><div class="large-2 columns">  <font color="white">Map</font> </div></a> 
- 			<div class="large-4 columns"></div> -->
- 		</div> 
- 	</div> 
-	
+ 			<a href="#tags"><div class="large-2 columns">  <font color="white">Tags</font> </div></a> 
+ 			<div class="large-4 columns"></div> 
+ 		</div>
+ 	</div>
 	
 	<!-- Begin Restaurant -->
 	<div class="row restaurant">
@@ -23,7 +34,7 @@
 				<!-- Slides Container -->
 				<div u="slides"
 					style="cursor: move; position: absolute; left: 0px; top: 0px; width: 612px; height: 350px; overflow: hidden;">
-					<div>
+					<!-- <div>
 						<img u="image"
 							src="<?php echo base_url()?>static/user_upload/restaurant_1.jpeg"
 							alt="slide 1" /> 
@@ -41,7 +52,27 @@
 							src="<?php echo base_url()?>static/user_upload/restaurant_3.jpeg"
 							alt="slide 3" /> <img u="thumb"
 							src="<?php echo base_url()?>static/user_upload/restaurant_3_thumb.jpg" />
-					</div>
+					</div> -->
+					<?php if (count($samplePhotos) > 0 ) { ?>
+						<?php for($i = 0; $i < count($samplePhotos); $i++ ) { ?> 
+							<div>
+								<img u="image"
+									src="<?php echo base_url() . 'static/user_upload/' . $samplePhotos[$i]->filename; ?>"
+									alt="slide <?php echo $i; ?>" /> 
+								<img u="thumb"
+									src="<?php echo base_url() . 'static/user_upload/' . $samplePhotos[$i]->thumbnailFilename; ?>" />
+							</div>
+						<?php } ?>
+					<?php } else { ?>
+						<div>
+							<img u="image"
+								src="<?php echo base_url()?>static/user_upload/restaurant_2.jpeg"
+								alt="slide 1" /> 
+								<img u="thumb"
+								src="<?php echo base_url()?>static/user_upload/restaurant_2_thumb.jpg" />
+						</div>
+					<?php } ?>
+
 				</div>
 				<!-- Arrow Navigator Skin Begin -->
 				<!-- Arrow Left -->
@@ -69,7 +100,35 @@
 			</div>
 			<div class="large-5 columns">
 				<div class="row">
-					<h3 class="restaurant-name"><?php echo $restaurant->name ?></h3>
+					<h3 class="restaurant-name" property="dc:title"><?php echo $restaurant->name ?></h3>
+					<div class="overall-rating" >
+						<?php if($restaurant->average_score == 1) { ?>
+			        		<input class="star" type="radio" name="restaurant-score" disabled="disabled" checked="checked"/>
+		        		<?php } else { ?>
+			        		<input class="star" type="radio" name="restaurant-score" disabled="disabled" />
+		        		<?php } ?>
+			        	<?php if($restaurant->average_score == 2) { ?>
+			        		<input class="star" type="radio" name="restaurant-score" disabled="disabled" checked="checked"/>
+		        		<?php } else { ?>
+			        		<input class="star" type="radio" name="restaurant-score" disabled="disabled" />
+		        		<?php } ?>
+		        		<?php if($restaurant->average_score == 3) { ?>
+			        		<input class="star" type="radio" name="restaurant-score" disabled="disabled" checked="checked"/>
+		        		<?php } else { ?>
+			        		<input class="star" type="radio" name="restaurant-score" disabled="disabled" />
+		        		<?php } ?>
+		        		<?php if($restaurant->average_score == 4) { ?>
+			        		<input class="star" type="radio" name="restaurant-score" disabled="disabled" checked="checked"/>
+		        		<?php } else { ?>
+			        		<input class="star" type="radio" name="restaurant-score" disabled="disabled" />
+		        		<?php } ?>
+		        		<?php if($restaurant->average_score == 5) { ?>
+			        		<input class="star" type="radio" name="restaurant-score" disabled="disabled" checked="checked"/>
+		        		<?php } else { ?>
+			        		<input class="star" type="radio" name="restaurant-score" disabled="disabled" />
+		        		<?php } ?>
+					</div>
+					<br>
 					<p class="restaurant-description">
 						<?php echo ( ((strlen($restaurant->description)) > 200) ? 
 								substr($restaurant->description, 0, 200) . "..." . "(<a href='#description'> read more</a>)" 
@@ -111,7 +170,15 @@
 							<input class="button tiny" type="button" value="Write a review" style="position:absolute;" onclick="open_review_form()"> 
 						</div>
 					<?php } ?>
+					<br>
+					<br>
 				<?php } ?>
+				<div class="row">
+					<div class="fb-like" 
+						data-href="http://ihotfood.com/index.php/restaurant/show_restaurant/<?php echo $restaurant->id; ?>" 
+						data-layout="standard" data-action="like" data-show-faces="true" data-share="true">
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -162,8 +229,21 @@
 			&nbsp
 			<div class="row map-container">
 				<div class="large-12 comments">
-					<a name="description"><h5>Restaurant Description </h5></a>
+					<a name="description" property="dc:description"><h5>Restaurant Description </h5></a>
 					<p><?php echo($restaurant->description) ?></p>
+				</div>
+			</div>
+			&nbsp
+			<div class="row map-container">
+				<div class="large-12 comments">
+					<a name="tags"><h5>Tags by restaurant owner</h5></a>
+					<ul id="res-tags">
+		        		<?php if(isset($restaurantTags) ) { ?>
+		        			<?php foreach($restaurantTags as $tag ) { ?>
+		        				<li><?php echo $tag; ?></li>
+		        			<?php } ?>
+	        			<?php } ?>
+		        	</ul>
 				</div>
 			</div>
 			&nbsp
@@ -219,14 +299,18 @@
 		      		return false;
 		    	}
 		  	});
+
+		  	$("#res-tags").tagit( {
+		  		readOnly : true,
+			});
 		});
 	</script>
 	<script type="text/javascript">
-
 		function open_review_form() {
 			clear_edit_form();
 			$("#review-form").show();
 		}
 	</script>
+	
 </body>
 </html>

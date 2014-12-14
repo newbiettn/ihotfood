@@ -1,10 +1,10 @@
 <!doctype html>
-<html class="no-js" lang="en">
+<html class="no-js" prefix="dc: http://purl.org/dc/elements/1.1/" lang="en">
 <head>
 	<meta charset="utf-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>iHootFood</title>
-	<link rel="stylesheet" href="<?php echo base_url(); ?>static/frontend/css/app.css" />
+	<link rel="stylesheet" href="<?php echo base_url(); ?>static/frontend/css/foundation.css" />
 	<link rel="stylesheet" href="<?php echo base_url(); ?>static/frontend/css/animate.css" />
 	<link rel="stylesheet" href="<?php echo base_url(); ?>static/frontend/css/font-awesome.min.css" />
 	<link rel="stylesheet" href="<?php echo base_url(); ?>static/frontend/css/alertify.core.css" />
@@ -25,6 +25,7 @@
 	<script src="<?php echo base_url(); ?>static/frontend/js/vendor/dropzone.js"></script>
 	<script src="<?php echo base_url(); ?>static/frontend/js/jquery-ui-1.11.2.custom/jquery-ui.js"></script>
 	<script src="<?php echo base_url(); ?>static/frontend/js/foundation.min.js"></script>
+	<script src="<?php echo base_url(); ?>static/frontend/js/foundation/foundation.clearing.js"></script>
 	<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=places"></script>
 	<script src="<?php echo base_url(); ?>static/frontend/js/vendor/gmap3.min.js"></script>
 	<script src="//js.pusher.com/2.2/pusher.min.js"></script>
