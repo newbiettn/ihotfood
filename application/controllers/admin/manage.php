@@ -7,6 +7,11 @@ class Manage extends CI_Controller {
 		$this->load->view('admin/dashboard');
 	}
 
+	public function show_new_post(){
+		$this->load->view('admin/new_post');
+	}
+
+	//show all users
 	public function get_all_user(){		
 		//$this->load->view('admin/dashboard');
 		$this->load->model('admin/manage_user_model');
@@ -28,24 +33,30 @@ class Manage extends CI_Controller {
 		$this->load->view('admin/edit_user_view', $data); 
 	}
 	public function do_edit_user(){
+		$this->form_validation->set_rules ( 'username', 'User Name', 'trim|required|min_length[4]|callback_validateUsernameSp|callback_validateUsernameNotEx' );
 		$id = $this->input->post('id');
-		$username = $this->input->post('username');
-		$fullname = $this->input->post('fullname');
-		$dob = $this->input->post('dob');
-		$email = $this->input->post('email'); 
-		$account_type = $this->input->post('account_type');
-		$gender = $this->input->post('gender');
-			$data = array (
-				'fullname' => $fullname,
-				'dob' => date('Y-m-d', strtotime($dob)), 
-				'username' => $username, 
-				'email' => $email, 
-				'account_type' => $account_type,
-				'gender' => $gender
-			);
-		$this->load->model('admin/manage_user_model'); 
-		$q = $this->manage_user_model->edit_user($id, $data);
-		$this->get_all_user();
+
+		if ($this->form_validation->run() == FALSE){
+			$this->show_edit_user($id); 
+		} else {		
+			$username = $this->input->post('username');
+			$fullname = $this->input->post('fullname');
+			$dob = $this->input->post('dob');
+			$email = $this->input->post('email'); 
+			$account_type = $this->input->post('account_type');
+			$gender = $this->input->post('gender');
+				$data = array (
+					'fullname' => $fullname,
+					'dob' => date('Y-m-d', strtotime($dob)), 
+					'username' => $username, 
+					'email' => $email, 
+					'account_type' => $account_type,
+					'gender' => $gender
+				);
+			$this->load->model('admin/manage_user_model'); 
+			$q = $this->manage_user_model->edit_user($id, $data);
+			$this->get_all_user();
+		}
 	}
 	//create user
 	public function show_create_user(){

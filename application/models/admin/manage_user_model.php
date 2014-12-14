@@ -23,7 +23,7 @@ class Manage_User_Model extends CI_Model{
 	}
 	function create_user($data){
 		$query = $this->db->insert('users', $data); 
-		echo $query;
+		//echo $query;
 	}
 	//validation of username 
 	function validateUsername($username){

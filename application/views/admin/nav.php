@@ -1,7 +1,9 @@
 <?php ?>
 <nav>
 	<ul>
-		<li class="section"><a href="<?php echo base_url()?>index.php/admin/manage"><span class="icon">&#128711;</span> Dashboard</a></li>
+		<li >
+			<a href="<?php echo base_url()?>index.php/admin/manage"><span class="icon">&#128711;</span> Dashboard</a>
+		</li>
 		<li>
 			<a href="<?php echo base_url()?>index.php/admin/manage/get_all_user"><span class="icon">&#128196;</span> Users</a>
 			<ul class="submenu">
@@ -10,10 +12,10 @@
 			</ul>	
 		</li>
 		<li>
-			<a href=""><span class="icon">&#127748;</span> Restaurants </a>
+			<a href="<?php echo base_url()?>index.php/admin/manage_restaurant/get_all_restaurant"><span class="icon">&#127748;</span> Restaurants </a>
 			<ul class="submenu">
-				<li><a href="">Create restaurant</a></li>
-				<li><a href="">View  all restaurants</a></li>
+				<li><a href="<?php echo base_url()?>index.php/admin/manage_restaurant/show_create_restaurant">Create restaurant</a></li>
+				<li><a href="<?php echo base_url()?>index.php/admin/manage_restaurant/get_all_restaurant">View  all restaurants</a></li>
 			</ul>
 		</li>
 		<li>
