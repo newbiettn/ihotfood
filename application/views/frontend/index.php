@@ -298,23 +298,6 @@
 		</div>
     </div>
 	<?php require 'scripts.php'?>
-<!-- 	<div class="subscribe-now"> -->
-<!-- 		<div class="row"> -->
-<!-- 			<div class="large-2 columns"> -->
-<!-- 				<h5>Subsribe us now</h5> -->
-<!-- 			</div> -->
-<!-- 			<div class="large-10 columns"> -->
-<!-- 		      <div class="row collapse"> -->
-<!-- 		        <div class="small-11 columns"> -->
-<!-- 		          <input type="text" placeholder="Your Email"> -->
-<!-- 		        </div> -->
-<!-- 		        <div class="small-1 columns"> -->
-<!-- 		          <a href="#" class="button postfix">Go</a> -->
-<!-- 		        </div> -->
-<!-- 		      </div> -->
-<!-- 		    </div> -->
-<!-- 	    </div> -->
-<!-- 	</div> -->
 	<?php require 'footer.php'?>
 </body>
 </html>

@@ -356,6 +356,7 @@
 				type: 'POST',
 				url: '<?php base_url()?>index.php/user/search/search_res',
 				dataType: 'json',
+				async: false,
 				data: {
 					ihf_event: 'search_res_in_map',
 					s_postcode: $('#s_postcode').val(),

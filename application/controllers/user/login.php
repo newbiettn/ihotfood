@@ -85,11 +85,16 @@ class Login extends CI_Controller {
 		$this->form_validation->set_rules ( 'email', 'Email Address', 'trim|required|valid_email|callback_validateEmail' );
 		$this->form_validation->set_rules ( 'email_confirm', 'Email Address', 'trim|required|valid_email|matches[email]|callback_validateEmail' );
 		
+		$latlong = $this->input->post ( 'latlong' );
+		
 		if ($this->form_validation->run () == FALSE) {
 			$this->show_register ();
 		} else {
 			$this->load->model ( 'user/basic_user_model' );
-			if ($query = $this->basic_user_model->create_member ()) {
+			if ($user_id = $this->basic_user_model->create_member ()) {
+				/****************** STORE USER BEHAVIOR SHIT BEGINS ******************/
+				$this->recommend->create_pio_user($user_id, $latlong);
+				/****************** STORE USER BEHAVIOR SHIT ENDS ******************/
 				$this->show_login ();
 			} else {
 				$this->load->view ( 'frontend/user/register' );

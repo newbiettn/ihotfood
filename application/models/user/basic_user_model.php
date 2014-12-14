@@ -64,7 +64,7 @@ class Basic_user_model extends CI_Model{
 			'account_type' => $this->input->post('account_type')
 		);
 		$q = $this->db->insert('users', $data);
-		return $q;
+		return $this->db->insert_id();
 	}
 
 	// --------------------------------------------------------------------
@@ -74,7 +74,7 @@ class Basic_user_model extends CI_Model{
 	  */
 	function create_member_from_array($userdata) {
 		$q = $this->db->insert('users', $userdata);
-		return $q;
+		return $this->db->insert_id();
 	}
 
 	// --------------------------------------------------------------------

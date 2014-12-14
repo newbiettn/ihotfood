@@ -37,6 +37,7 @@
 	                    Already a member ?
 	                    <a href="<?php echo base_url()?>index.php/user/login/show_login" class="to_register"> Go and log in </a>
 	                </div>
+	                <input name="latlong" type="hidden" id="latlong">
 				</fieldset>
 				 <div class="large-12">
 					<input class="button small" type="submit" value="Register"/>
@@ -44,6 +45,17 @@
 			</form>
 		</div>
 	</div>
+	<script>
+	$(document).ready(function(){
+		if (navigator.geolocation) {
+	        navigator.geolocation.getCurrentPosition(addPosition);
+	    }
+		function addPosition(position) {
+		    latlong = position.coords.latitude + ',' + position.coords.longitude;
+		    $('#latlong').val(latlong);	
+		}
+	});
+	</script>
 	<?php require 'footer.php'?>
 	<?php require 'scripts.php'?>
 </body>

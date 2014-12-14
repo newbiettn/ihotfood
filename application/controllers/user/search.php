@@ -26,6 +26,7 @@ class Search extends CI_Controller {
 			$res = $res['results'];
 			
 			foreach ($res as $i) {
+				if(strlen($i['name']) > 0) {
 				$data = array();
 				
 				if(isset($i['name'])) {
@@ -42,6 +43,8 @@ class Search extends CI_Controller {
 				}
 				if(isset($i['rating'])) {
 					$data['rating'] = $i['rating'];
+				} else {
+					$data['rating'] = 0;
 				}
 
 				//if restaurant name exits
@@ -50,6 +53,9 @@ class Search extends CI_Controller {
 					//if it does not exist, insert, otherwise, get id by exact name
 					if (!$this->search_model->is_res_stored($data['name'])) {
 						$restaurant_id = $this->search_model->insert_res($data);
+						/****************** STORE RESTAURANT FOR RECOMMENDATION SHIT BEGINS ******************/
+						$this->recommend->create_pio_item($restaurant_id, $data['latlong'], $data['name'], $data['rating'], $data['address']);
+						/****************** STORE RESTAURANT FOR RECOMMENDATION SHIT ENDS ******************/
 					} else {
 						$restaurant_id = $this->search_model->get_res_id_by_name($data['name']);
 					}
@@ -95,6 +101,7 @@ class Search extends CI_Controller {
 				
 				//push to jsonArr for displaying
 				array_push($jsonArr, $data);
+			}
 			}
 		} catch(Exception $e) {
 			echo $e;

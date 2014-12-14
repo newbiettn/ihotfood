@@ -27,6 +27,13 @@ class Restaurant extends CI_Controller {
 				'reviews' => $reviews,
 			);
 			
+			/****************** STORE USER BEHAVIOR SHIT BEGINS ******************/
+			if ($this->session->userdata('id')) {
+				$user_id = $this->session->userdata('id');
+				$this->recommend->record_view_item($user_id, $id);
+			}
+			/****************** STORE USER BEHAVIOR SHIT ENDS ******************/
+			
 			$this->load->view ( 'frontend/view_restaurant', $data );
 		}
 	}
@@ -100,7 +107,14 @@ class Restaurant extends CI_Controller {
 				//notify
 				$this->notification->notify_new_restaurant_review($resId, $userid, $new_review_id, $socket_id);
 				/****************** NOTIFICATION SHIT ENDS ******************/
-					
+				/****************** STORE USER BEHAVIOR SHIT BEGINS ******************/
+				if ($this->session->userdata('id')) {
+					$user_id = $this->session->userdata('id');
+					$score 	 = $this->input->post('score');
+					$this->recommend->record_write_review_item($user_id, $resId, $score);
+				}
+				/****************** STORE USER BEHAVIOR SHIT ENDS ******************/
+				
 				$jsonArr['status'] = 'true';
 				$jsonArr['new-review-id'] = $new_review_id;
 			}
