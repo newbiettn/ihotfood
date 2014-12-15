@@ -1,0 +1,18 @@
+1413105487|Ngoc adds the project skeleton
+1413278287|Khanh adds typical use cases
+1413364687|Duc finishes the database architecture
+1413710287|Ngoc adds the template (CSS+HTML) for administrators
+1414660687|Ngoc finishes the site template for 1st presentation
+1415179087|Duc adds login functionality by Facebook
+1416043087|Duc finishes "Adding new location" functionality
+1416820687|Ngoc creates the restaurant template
+1417079887|Ngoc begins to work towards "Search location" and refactors code
+1417252687|Code merging and therefore, Ngoc and Duc have to fix bugs
+1417511887|Ngoc finishes "Search" functionality
+1417598287|Duc adds "Edit/Delete" review
+1417684687|Duc adds "Image Upload" function
+1417771087|Ngoc starts to work on "Notification" function
+1417857487|Khanh finishes "User Management" function
+1418375887|Ngoc begins "Recommendation Engine" (code refactor a lot)
+1418462287|Khanh finishes "Restaurant Management" function
+1418548687|Ngoc finishes "Recommendation" feature

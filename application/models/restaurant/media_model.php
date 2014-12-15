@@ -10,9 +10,28 @@ class Media_Model extends CI_Model{
 		$this->db->insert('medias', $data);
 	}
 
+	public function get_media($filename) {
+		$this->db->where('filename', $filename);
+		$query = $this->db->get('medias');
+		if($query->num_rows == 1){
+			return $query->row();
+		} 
+		return null;
+	}
+
 	public function get_all_album_medias($albumId) {
 		$this->db->where('album_id', $albumId);
 		$query = $this->db->get('medias');
+		$media_list = array();
+		foreach($query->result() as $media) {
+			array_push($media_list, $media);
+		}
+		return $media_list;
+	}
+
+	public function get_sample_album_medias($albumId, $nSamples) {
+		$this->db->where('album_id', $albumId);
+		$query = $this->db->get('medias',$nSamples);
 		$media_list = array();
 		foreach($query->result() as $media) {
 			array_push($media_list, $media);

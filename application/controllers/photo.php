@@ -90,7 +90,9 @@ class Photo extends CI_Controller {
 					$targetPath = 'static/user_upload/';
 					$serverFileName = $this->generate_unique_file_name($album_id, $fileName);
 					$targetFile = $targetPath . $serverFileName;
-
+					
+					var_dump($serverFileName);
+					break;
 					// save file to server
 					move_uploaded_file($tempFile, $targetFile);
 					
@@ -144,13 +146,12 @@ class Photo extends CI_Controller {
 	 	echo(json_encode($jsonArr));
     }
 
-    public function generate_unique_file_name($album_id, $fileName) {
+	public function generate_unique_file_name($album_id, $fileName) {
     	$tempFilename = tempnam('static/user_upload/', '');
     	unlink($tempFilename);
     	// tempFilename = "directory/<unique>.tmp"
-    	$temp = explode('\\', $tempFilename);
-    	// get file extension
+    	// used to get file extension
     	$temp2 = explode('.', $fileName);
-    	return explode('.', $temp[count($temp)-1])[0] . $_SERVER['REQUEST_TIME'] . '.' . $temp2[count($temp2) -1 ];
+    	return basename($tempFilename, ".tmp") . $_SERVER['REQUEST_TIME'] . '.' . $temp2[count($temp2) -1 ];
     }
 }
