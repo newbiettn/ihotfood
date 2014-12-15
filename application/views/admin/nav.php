@@ -1,35 +1,27 @@
 <?php ?>
 <nav>
 	<ul>
-		<li class="section"><a href="index.html"><span class="icon">&#128711;</span> Dashboard</a></li>
+		<li >
+			<a href="<?php echo base_url()?>index.php/admin/manage"><span class="icon">&#128711;</span> Dashboard</a>
+		</li>
 		<li>
-			<a href="list_pages"><span class="icon">&#128196;</span> Pages</a>
+			<a href="<?php echo base_url()?>index.php/admin/manage/get_all_user"><span class="icon">&#128196;</span> Users</a>
 			<ul class="submenu">
-				<li><a href="">Create page</a></li>
-				<li><a href="">View pages</a></li>
+				<li><a href="<?php echo base_url()?>index.php/admin/manage/show_create_user">Create user</a></li>
+				<li><a href="<?php echo base_url()?>index.php/admin/manage/get_all_user">View all users</a></li>
 			</ul>	
 		</li>
 		<li>
-			<a href=""><span class="icon">&#127748;</span> Media <span class="pip">7</span></a>
+			<a href="<?php echo base_url()?>index.php/admin/manage_restaurant/get_all_restaurant"><span class="icon">&#127748;</span> Restaurants </a>
 			<ul class="submenu">
-				<li><a href="">Upload file</a></li>
-				<li><a href="">View files</a></li>
+				<li><a href="<?php echo base_url()?>index.php/admin/manage_restaurant/show_create_restaurant">Create restaurant</a></li>
+				<li><a href="<?php echo base_url()?>index.php/admin/manage_restaurant/get_all_restaurant">View  all restaurants</a></li>
 			</ul>
 		</li>
 		<li>
-			<a href=""><span class="icon">&#59160;</span> Blog <span class="pip">12</span></a>
+			<a href=""><span class="icon">&#59160;</span> Comments</a>
 			<ul class="submenu">
-				<li><a href="manage_dashboard/create_new_post">New post</a></li>
-				<li><a href="">All posts</a></li>
-				<li><a href="">View comments</a></li>
-			</ul>
-		</li>
-		<li><a href=""><span class="icon">&#128202;</span> Statistics</a></li>
-		<li><a href=""><span class="icon">&#128101;</span> Users <span class="pip">3</span></a></li>
-		<li>
-			<a href=""><span class="icon">&#9881;</span> UI Elements</a>
-			<ul class="submenu">
-				<li><a href="">Icon fonts</a></li>
+				<li><a href="manage_dashboard/create_new_post">View all comments</a></li>
 			</ul>
 		</li>
 	</ul>
