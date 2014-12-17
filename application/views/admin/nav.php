@@ -18,11 +18,5 @@
 				<li><a href="<?php echo base_url()?>index.php/admin/manage_restaurant/get_all_restaurant">View  all restaurants</a></li>
 			</ul>
 		</li>
-		<li>
-			<a href=""><span class="icon">&#59160;</span> Comments</a>
-			<ul class="submenu">
-				<li><a href="manage_dashboard/create_new_post">View all comments</a></li>
-			</ul>
-		</li>
 	</ul>
 </nav>

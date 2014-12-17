@@ -2,16 +2,12 @@
 
 class Manage extends CI_Controller {
 	
-	
+	//show index view
 	public function index() {
 		$this->load->view('admin/dashboard');
 	}
 
-	public function show_new_post(){
-		$this->load->view('admin/new_post');
-	}
-
-	//show all users
+	//VIEWS: show all users
 	public function get_all_user(){		
 		//$this->load->view('admin/dashboard');
 		$this->load->model('admin/manage_user_model');
@@ -20,18 +16,25 @@ class Manage extends CI_Controller {
 		$this->load->view('admin/manage_user_view', $data);	
 		
 	}
+
+	//MODELS: execute: delete user
 	public function do_delete_user($id){
 		$this->load->model('admin/manage_user_model');
 		$q = $this->manage_user_model->delete_user($id); 
 		$this->get_all_user();
 	}
-	//edit user
+
+	//VIEWS: edit user
 	public function show_edit_user($id){
 		$this->load->model('admin/manage_user_model'); 
 		$q = $this->manage_user_model->get_user($id);
 		$data = array('current_user' => $q);
 		$this->load->view('admin/edit_user_view', $data); 
 	}
+
+	//MODELS: execute: edit user
+	// validate user information: username 
+	// update to database 
 	public function do_edit_user(){
 		$this->form_validation->set_rules ( 'username', 'User Name', 'trim|required|min_length[4]|callback_validateUsernameSp|callback_validateUsernameNotEx' );
 		$id = $this->input->post('id');
@@ -58,11 +61,15 @@ class Manage extends CI_Controller {
 			$this->get_all_user();
 		}
 	}
-	//create user
+	//VIEWS: show: create user
 	public function show_create_user(){
 		$this->load->view('admin/create_user_view');
 
 	}
+
+	//MODELS: execute: create user
+	// validate user information: username, password, email
+	// insert to database
 	public function do_create_user(){
 		//echo "start create user";
 		$this->form_validation->set_rules ( 'username', 'User Name', 'trim|required|min_length[4]|callback_validateUsernameSp|callback_validateUsernameNotEx' );
